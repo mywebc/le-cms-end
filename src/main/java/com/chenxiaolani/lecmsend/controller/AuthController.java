@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -39,6 +36,9 @@ public class AuthController {
     @PostMapping("/auth/login")
     @ResponseBody
     public Result login(@RequestBody Map<String, Object> request) {
+
+        System.out.println(request);
+
         String username = request.get("username").toString();
         String password = request.get("password").toString();
 
@@ -50,7 +50,7 @@ public class AuthController {
         try {
             userDetails = userDetailsService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
-            return new Result(false, "用户不存在", null);
+            return new Result(false, "用户不存在", -1,null);
         }
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
@@ -62,9 +62,9 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(token);
 
             User loginInfo = new User(1, username);
-            return new Result(true, "登录成功", loginInfo);
+            return new Result(true, "登录成功", 0,loginInfo);
         } catch (BadCredentialsException e) {
-            return new Result(false, "登录失败", null);
+            return new Result(false, "登录失败", -1,null);
         }
     }
 
