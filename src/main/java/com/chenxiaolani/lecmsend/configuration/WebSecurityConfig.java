@@ -2,6 +2,7 @@ package com.chenxiaolani.lecmsend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,12 +20,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // 跨站请求伪造默认开启的，这里需要手动关闭
-        http.csrf().disable();
         http
+                // 开启权限拦截
                 .authorizeRequests()
                 // 访问auth接口，登录相关的接口不用拦截，全部通过
-                .antMatchers("/", "/auth/**").permitAll();
+                .antMatchers("/", "/auth/**").permitAll()
+                // 允许所有OPTIONS请求
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // 允许静态资源访问
+                .antMatchers(HttpMethod.GET,
+                        "/",
+                        "/*.html",
+                        "/favicon.ico",
+                        "/**/*.html",
+                        "/**/*.css",
+                        "/**/*.js"
+                ).permitAll()
+                // 跨站请求伪造默认开启的，这里需要手动关闭
+                .and().csrf().disable()
+                // 允许跨域
+                .cors().disable();
     }
 
     @Bean

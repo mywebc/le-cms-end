@@ -36,14 +36,8 @@ public class AuthController {
     @PostMapping("/auth/login")
     @ResponseBody
     public Result login(@RequestBody Map<String, Object> request) {
-
-        System.out.println(request);
-
         String username = request.get("username").toString();
         String password = request.get("password").toString();
-
-        System.out.println(username);
-        System.out.println(password);
 
         // 通过用户名去拿用户真正的密码
         UserDetails userDetails = null;
