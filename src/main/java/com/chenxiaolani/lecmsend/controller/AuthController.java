@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 @Controller
@@ -25,6 +26,7 @@ public class AuthController {
 
     private UserService userService;
 
+    @Inject
     public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService) {
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
