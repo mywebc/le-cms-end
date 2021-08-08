@@ -4,12 +4,10 @@ import com.chenxiaolani.lecmsend.entity.Result;
 import com.chenxiaolani.lecmsend.entity.User;
 import com.chenxiaolani.lecmsend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +17,10 @@ import java.util.Map;
 
 @Controller
 public class AuthController {
-
     // 这是spring security 里面的接口
     private UserDetailsService userDetailsService;
     // 这是spring security 里面内置的类AuthenticationManager
     private AuthenticationManager authenticationManager;
-
     private UserService userService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -38,8 +34,12 @@ public class AuthController {
 
     @GetMapping("/auth")
     @ResponseBody
-    public String auth() {
-        return "test";
+    public Result auth() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (username.contains("anonymous")) {
+            return new Result(false, "请先登录", -1, null);
+        }
+        return new Result(true, null, 0, userService.getUserInfoByUsername((username)));
     }
 
     @PostMapping("/auth/login")
@@ -55,30 +55,18 @@ public class AuthController {
             if (!bCryptPasswordEncoder.matches(password, userInfo.getPassword())) {
                 return new Result(false, "密码错误", 0, null);
             }
-            return new Result(true, "登录成功", 0, userInfo);
+            // 生成令牌
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+            try {
+                // 进行鉴权
+                authenticationManager.authenticate(token);
+                // 上下文存储下来
+                SecurityContextHolder.getContext().setAuthentication(token);
+                return new Result(true, "登录成功", 0, userInfo);
+            } catch (AuthenticationException e) {
+                return new Result(false, "登录失败", -1, null);
+            }
         }
-
-//        // 通过用户名去拿用户真正的密码
-//        UserDetails userDetails = null;
-//        try {
-//            userDetails = userDetailsService.loadUserByUsername(username);
-//        } catch (UsernameNotFoundException e) {
-//            return new Result(false, "用户不存在", -1, null);
-//        }
-//
-//        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
-//
-//        // 让鉴权管理者去鉴权，有可能鉴权失败需要try catch
-//        try {
-//            // 比对密码
-//            authenticationManager.authenticate(token);
-//            SecurityContextHolder.getContext().setAuthentication(token);
-//
-//            User loginInfo = new User(username, password);
-//            return new Result(true, "登录成功", 0, loginInfo);
-//        } catch (BadCredentialsException e) {
-//            return new Result(false, "登录失败", -1, null);
-//        }
     }
 
     @PostMapping("/auth/register")
