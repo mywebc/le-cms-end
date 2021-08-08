@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,14 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     private UserService userService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Inject
-    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService) {
+    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @GetMapping("/auth")
@@ -49,7 +52,7 @@ public class AuthController {
         if (userInfo == null) {
             return new Result(false, "用户不存在", 0, userInfo);
         } else {
-            if(!userInfo.getPassword().equals(password)) {
+            if (!bCryptPasswordEncoder.matches(password, userInfo.getPassword())) {
                 return new Result(false, "密码错误", 0, null);
             }
             return new Result(true, "登录成功", 0, userInfo);
@@ -88,7 +91,7 @@ public class AuthController {
         if (userInfo != null) {
             return new Result(false, "用户已存在", 0, userInfo);
         } else {
-            User registerUserInfo = userService.registerUser(username, password);
+            User registerUserInfo = userService.registerUser(username, bCryptPasswordEncoder.encode(password));
             return new Result(true, "注册成功", 0, registerUserInfo);
         }
     }
