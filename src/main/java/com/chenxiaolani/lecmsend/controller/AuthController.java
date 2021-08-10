@@ -2,6 +2,7 @@ package com.chenxiaolani.lecmsend.controller;
 
 import com.chenxiaolani.lecmsend.entity.Result;
 import com.chenxiaolani.lecmsend.entity.User;
+import com.chenxiaolani.lecmsend.jwt.JwtTokenProvider;
 import com.chenxiaolani.lecmsend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +14,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Controller
 public class AuthController {
@@ -23,13 +28,15 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     private UserService userService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Inject
-    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @GetMapping("/auth")
@@ -56,13 +63,16 @@ public class AuthController {
                 return new Result(false, "密码错误", 0, null);
             }
             // 生成令牌
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+//            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
             try {
                 // 进行鉴权
-                authenticationManager.authenticate(token);
+//                authenticationManager.authenticate(token);
                 // 上下文存储下来
-                SecurityContextHolder.getContext().setAuthentication(token);
-                return new Result(true, "登录成功", 0, userInfo);
+//                SecurityContextHolder.getContext().setAuthentication(token);
+                System.out.println("getusername" + username);
+                List<String> roles = Stream.of("admin", "root").collect(toList());
+                String token = jwtTokenProvider.createToken(username, roles);
+                return new Result(true, "登录成功", 0, userInfo, token);
             } catch (AuthenticationException e) {
                 return new Result(false, "登录失败", -1, null);
             }
