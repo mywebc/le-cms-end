@@ -1,9 +1,11 @@
 package com.chenxiaolani.lecmsend.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_EMPTY) // 属性值为空的将不会序列化
 public class Result<T> {
     private boolean status;
     private String msg;
