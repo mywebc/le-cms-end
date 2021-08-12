@@ -30,7 +30,6 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(jwtProperties.getSecretKey().getBytes());
     }
 
-    //,
     public String createToken(String username, List<String> roles) {
         System.out.println("这是用户名" + username);
         Claims claims = Jwts.claims().setSubject(username);
@@ -54,19 +53,16 @@ public class JwtTokenProvider {
     }
 
     public String getUsername(String token) {
-        String aa = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        System.out.println("aaaa+++++++++_____+++++" + aa);
-        return aa;
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
     // 从请求头里获取token
     public String resolveToken(HttpServletRequest req) {
-        System.out.println("hello++++++++++++++++" + req);
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        return null;
+        throw new InvalidJwtAuthenticationException("miss token");
     }
 
     // 验证token是否有效
@@ -81,6 +77,7 @@ public class JwtTokenProvider {
 
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("报错了" + e);
             throw new InvalidJwtAuthenticationException("Expired or invalid JWT token");
         }
     }
