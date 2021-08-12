@@ -29,9 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 开启权限拦截
                 .authorizeRequests()
                 // 访问auth接口，登录相关的接口不用拦截，全部通过
-                .antMatchers("/", "/auth/**").permitAll()
-                // 允许所有OPTIONS请求
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 // 允许静态资源访问
                 .antMatchers(HttpMethod.GET,
                         "/",
@@ -56,8 +54,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public UserDetailsService userDetailsService() {
         UserDetails user =
                 User.withDefaultPasswordEncoder()
-                        .username("user")
-                        .password("password")
+                        .username("root")
+                        .password("1234")
                         .roles("USER")
                         .build();
 

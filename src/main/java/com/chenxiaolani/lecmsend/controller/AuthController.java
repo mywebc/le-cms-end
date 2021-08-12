@@ -93,4 +93,11 @@ public class AuthController {
             return new Result(true, "注册成功", 0, registerUserInfo);
         }
     }
+
+    //测试权限
+    @GetMapping("/userInfo")
+    @ResponseBody
+    public Result getUserInfo() {
+        return new Result(true, "获取成功", 0, null);
+    }
 }

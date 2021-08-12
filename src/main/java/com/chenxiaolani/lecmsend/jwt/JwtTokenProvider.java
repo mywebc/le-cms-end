@@ -54,11 +54,14 @@ public class JwtTokenProvider {
     }
 
     public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        String aa = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        System.out.println("aaaa+++++++++_____+++++" + aa);
+        return aa;
     }
 
     // 从请求头里获取token
     public String resolveToken(HttpServletRequest req) {
+        System.out.println("hello++++++++++++++++" + req);
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);

@@ -35,6 +35,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
         try {
             // 获取token
             String token = jwtTokenProvider.resolveToken(request);
+
             // 验证token是否有效
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 // 获取用户信息
