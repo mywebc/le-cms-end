@@ -13,7 +13,7 @@ public class Result<T> {
     T data;
     private String token;
 
-    public Result(boolean status, String msg, int code, T data) {
+    public Result(int id, boolean status, String msg, int code, T data) {
         this.status = status;
         this.msg = msg;
         this.code = code;
