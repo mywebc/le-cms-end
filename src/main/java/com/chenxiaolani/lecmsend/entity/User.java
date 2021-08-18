@@ -1,5 +1,6 @@
 package com.chenxiaolani.lecmsend.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -12,6 +13,7 @@ public class User {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     private String username;
+    @JSONField(serialize = false)
     private String password;
 
     public User(String username, String password) {

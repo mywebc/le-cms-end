@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,24 +30,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 开启权限拦截
                 .authorizeRequests()
                 // 访问auth接口，登录相关的接口不用拦截，全部通过
-                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                // 允许静态资源访问
-                .antMatchers(HttpMethod.GET,
-                        "/",
-                        "/*.html",
-                        "/favicon.ico",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js"
-                ).permitAll()
+                .antMatchers("/", "/auth/login").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 // 增加过滤器
-                .apply(new JwtSecurityConfigurer(jwtTokenProvider))
-                // 跨站请求伪造默认开启的，这里需要手动关闭
-                .and().csrf().disable()
-                // 允许跨域
-                .cors().disable();
-
+                .addFilter()
+                .and()
+                .cors() //跨域
+                .and()
+                //关闭csrf防护，类似于防火墙，不关闭上面的设置不会真正生效。
+                .csrf().disable();
     }
 
     @Bean
