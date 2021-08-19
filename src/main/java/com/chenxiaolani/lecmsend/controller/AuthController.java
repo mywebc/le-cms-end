@@ -2,10 +2,8 @@ package com.chenxiaolani.lecmsend.controller;
 
 import com.chenxiaolani.lecmsend.entity.Result;
 import com.chenxiaolani.lecmsend.entity.User;
-import com.chenxiaolani.lecmsend.jwt.JwtTokenProvider;
 import com.chenxiaolani.lecmsend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,15 +26,13 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     private UserService userService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private JwtTokenProvider jwtTokenProvider;
 
     @Inject
-    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @GetMapping("/auth")
@@ -59,7 +55,7 @@ public class AuthController {
         if (userInfo == null) {
             return new Result(false, "用户不存在", 0, userInfo);
         } else {
-            if (!bCryptPasswordEncoder.matches(password, userInfo.getPassword())) {
+            if (password != userInfo.getPassword()) {
                 return new Result(false, "密码错误", 0, null);
             }
             // 生成令牌
@@ -71,8 +67,7 @@ public class AuthController {
 //                SecurityContextHolder.getContext().setAuthentication(token);
                 System.out.println("getusername" + username);
                 List<String> roles = Stream.of("admin", "root").collect(toList());
-                String token = jwtTokenProvider.createToken(username, roles);
-                return new Result(true, "登录成功", 0, userInfo, token);
+                return new Result(true, "登录成功", 0, userInfo);
             } catch (AuthenticationException e) {
                 return new Result(false, "登录失败", -1, null);
             }
@@ -89,7 +84,7 @@ public class AuthController {
         if (userInfo != null) {
             return new Result(false, "用户已存在", 0, userInfo);
         } else {
-            User registerUserInfo = userService.registerUser(username, bCryptPasswordEncoder.encode(password));
+            User registerUserInfo = userService.registerUser(username, password);
             return new Result(true, "注册成功", 0, registerUserInfo);
         }
     }

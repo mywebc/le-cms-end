@@ -1,44 +1,36 @@
 package com.chenxiaolani.lecmsend.configuration;
 
-import com.chenxiaolani.lecmsend.jwt.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.chenxiaolani.lecmsend.jwt.JwtFilter;
+import com.chenxiaolani.lecmsend.jwt.JwtLoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import javax.inject.Inject;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 // 开启权限拦截
                 .authorizeRequests()
-                // 访问auth接口，登录相关的接口不用拦截，全部通过
-                .antMatchers("/", "/auth/login").permitAll()
+                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/auth/register").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                // 增加过滤器
-                .addFilter()
-                .and()
-                .cors() //跨域
-                .and()
-                //关闭csrf防护，类似于防火墙，不关闭上面的设置不会真正生效。
+                .addFilterBefore(new JwtLoginFilter("/auth/login", authenticationManager()), UsernamePasswordAuthenticationFilter.class)
+                .addFilter(new JwtFilter(authenticationManager()))
                 .csrf().disable();
     }
 
@@ -56,13 +48,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public AuthenticationManager customAuthenticationManager() throws Exception {
-        return authenticationManager();
+    public AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
     }
 
-    // 一个内置的加密方法
+    /**
+     * 将BCryptPasswordEncoder交给spring容器管理
+     * @return
+     */
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }
