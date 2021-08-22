@@ -3,6 +3,7 @@ package com.chenxiaolani.lecmsend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chenxiaolani.lecmsend.entity.User;
 import com.chenxiaolani.lecmsend.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -10,12 +11,8 @@ import javax.inject.Inject;
 @Service
 public class UserService {
 
+    @Autowired
     private UserMapper userMapper;
-
-    @Inject
-    public UserService(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
 
     public User getUserInfoByUsername(String username) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
@@ -29,4 +26,5 @@ public class UserService {
         userMapper.insert(userInfo);
         return userInfo;
     }
+
 }

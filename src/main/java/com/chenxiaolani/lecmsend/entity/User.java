@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.stereotype.Repository;
 
 @Data
+@Repository // 加上这个，解决依赖注入的红色警告
 public class User {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
