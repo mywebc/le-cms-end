@@ -7,6 +7,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -39,6 +40,13 @@ public class AuthController {
         } catch (IncorrectCredentialsException e) {
             return new Result(false, "密码错误", 0, null);
         }
+    }
+
+    @RequestMapping("/auth/logout")
+    public Result logout() {
+        Subject subject = SecurityUtils.getSubject();
+        subject.logout();
+        return new Result(true, "退出成功", 0, null);
     }
 
     @PostMapping("/auth/register")

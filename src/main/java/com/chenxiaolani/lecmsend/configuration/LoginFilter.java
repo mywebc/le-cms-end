@@ -15,6 +15,6 @@ public class LoginFilter extends UserFilter {
     @Override
     protected void redirectToLogin(ServletRequest request, ServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
-        response.getWriter().write(JSONObject.toJSONString(new Result(false, "请先登录", -1, null)));
+        response.getWriter().write(JSONObject.toJSONString(new Result(false, "请先登录", 401, null)));
     }
 }
