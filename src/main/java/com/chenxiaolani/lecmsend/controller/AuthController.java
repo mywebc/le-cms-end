@@ -4,11 +4,9 @@ import com.chenxiaolani.lecmsend.entity.Result;
 import com.chenxiaolani.lecmsend.entity.User;
 import com.chenxiaolani.lecmsend.service.UserService;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
@@ -25,25 +23,22 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @GetMapping("/auth")
-    public Result auth() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (username.contains("anonymous")) {
-            return new Result(false, "请先登录", -1, null);
-        }
-        return new Result(true, null, 0, userService.getUserInfoByUsername((username)));
-    }
-
     @PostMapping("/auth/login")
     public Result login(@RequestBody Map<String, Object> request) {
         String username = request.get("username").toString();
         String password = request.get("password").toString();
 
         // 交给shrio
-//        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-//        token.setRememberMe(true);
-//        SecurityUtils.getSubject().login(token);
-        return null;
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+        try {
+            token.setRememberMe(true);
+            SecurityUtils.getSubject().login(token);
+            return new Result(true, "登录成功", 0, null);
+        } catch (UnknownAccountException e) {
+            return new Result(false, "用户名错误", 0, null);
+        } catch (IncorrectCredentialsException e) {
+            return new Result(false, "密码错误", 0, null);
+        }
     }
 
     @PostMapping("/auth/register")

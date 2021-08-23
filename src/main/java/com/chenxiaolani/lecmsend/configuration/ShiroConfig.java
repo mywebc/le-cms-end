@@ -1,6 +1,7 @@
 package com.chenxiaolani.lecmsend.configuration;
 
 import com.chenxiaolani.lecmsend.service.ShrioRealm;
+import com.chenxiaolani.lecmsend.service.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -19,7 +20,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import java.util.HashMap;
 import java.util.Map;
 
-//@Configuration
+@Configuration
 public class ShiroConfig {
 
     @Bean
@@ -29,9 +30,9 @@ public class ShiroConfig {
         Map<String, String> pattern = new HashMap<>();
 
         // 设置过滤路径
-        pattern.put("/**", "anon");
-//        pattern.put("/auth/register", "anon");
-//        shiroFilterFactoryBean.setLoginUrl("/auth/login");
+        pattern.put("/auth/login", "anon");
+        pattern.put("/auth/register", "anon");
+        pattern.put("/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(pattern);
         return shiroFilterFactoryBean;
     }
@@ -40,7 +41,7 @@ public class ShiroConfig {
     public SecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
 
-        securityManager.setRealm(new ShrioRealm());
+        securityManager.setRealm(myRealm());
         securityManager.setCacheManager(new MemoryConstrainedCacheManager());
         securityManager.setSessionManager(new DefaultSessionManager());
         return securityManager;
